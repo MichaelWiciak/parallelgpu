@@ -33,28 +33,6 @@ int main( int argc, char **argv )
 		*weights   = (float*) malloc( N*M*sizeof(float) );
 	initialiseArrays( gradients, inputs, weights, N, M );
 	
-	// create perfect copies of the arrays
-	float
-		*gradients_test = (float*) malloc( N  *sizeof(float) ),
-		*inputs_test    = (float*) malloc(   M*sizeof(float) ),
-		*weights_test   = (float*) malloc( N*M*sizeof(float) );
-	
-	// copy the data
-	for( int i=0; i<N  ; i++ ) gradients_test[i] = gradients[i];
-	for( int i=0; i<  M; i++ ) inputs_test   [i] = inputs   [i];
-	for( int i=0; i<N*M; i++ ) weights_test  [i] = weights  [i];
-	
-	// serial check 
-	for( int i=0; i<N; i++ )
-	{
-		for( int j=0; j<M; j++ )
-			{
-				weights_test[i*M+j] += gradients_test[i] * inputs_test[j];
-			}
-	}
-
-	displayWeights( weights_test, N, M) ;
-	
 
 	cl_mem
 		d_gradients = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, N  *sizeof(float), gradients, &status ),
@@ -70,25 +48,27 @@ int main( int argc, char **argv )
 
 
 	// set the kernel arguments
-	clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_weights);
-    clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_gradients);
-    clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_inputs);
-    clSetKernelArg(kernel, 3, sizeof(int), &N);
-    clSetKernelArg(kernel, 4, sizeof(int), &M);
-
-	// copy the data to the device
-	clEnqueueWriteBuffer(queue, d_gradients, CL_TRUE, 0, N  *sizeof(float), gradients, 0, NULL, NULL);
-	clEnqueueWriteBuffer(queue, d_inputs,    CL_TRUE, 0,   M*sizeof(float), inputs,    0, NULL, NULL);
-	clEnqueueWriteBuffer(queue, d_weights,   CL_TRUE, 0, N*M*sizeof(float), weights,   0, NULL, NULL);
+    clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_gradients);
+    clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_inputs);
+	clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_weights);
+    clSetKernelArg(kernel, 3, sizeof(int), &M);
+	
 
 	// execute the kernel
-	size_t global_work_size = N;
+	size_t global_work_size;
 	clGetDeviceInfo( device, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(size_t), &global_work_size, NULL);
 
 
 	size_t indexSpaceSize[1], workGroupSize[1];
 	indexSpaceSize[0] = N*M;
-	workGroupSize[0] = global_work_size;
+
+	
+	if (N*M < global_work_size){
+		workGroupSize[0] = N*M;
+	}
+	else{
+		workGroupSize[0] = global_work_size;
+	}
 
 	clEnqueueNDRangeKernel(queue, kernel, 1, NULL, indexSpaceSize, workGroupSize, 0, NULL, NULL);
 
@@ -112,6 +92,17 @@ int main( int argc, char **argv )
 	// Output the result and clear up.
 	//
 	
+
+	float *weights_test   = (float*) malloc( N*M*sizeof(float) );
+	for( int i=0; i<N; i++ )
+	{
+		for( int j=0; j<M; j++ )
+			{
+				weights_test[i*M+j] += gradients[i] * inputs[j];
+			}
+	}
+	
+	displayWeights(weights_test, N, M);
 
 
 	// Output result to screen. DO NOT REMOVE THIS LINE (or alter displayWeights() in helper_cwk.h); this will be replaced
