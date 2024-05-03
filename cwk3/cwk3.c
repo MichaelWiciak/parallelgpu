@@ -82,17 +82,6 @@ int main( int argc, char **argv )
 	// 	printf("weights arrays are different\n");
 	
 
-
-	//
-	// Implement the GPU solution to the problem.
-	//
-
-	
-	//
-	// Output the result and clear up.
-	//
-	
-
 	float *weights_test   = (float*) malloc( N*M*sizeof(float) );
 	for( int i=0; i<N; i++ )
 	{
