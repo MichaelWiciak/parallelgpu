@@ -106,13 +106,7 @@ int main( int argc, char **argv )
 	clReleaseCommandQueue( queue   );
 	clReleaseContext     ( context );
 
-	// serial check
-		// perform the desired operation in serial on the CPU just to check the results
-	// which is just standard gradients, inputs and weights multiplication
 
-
-	// free( gradients_test );
-	// free( inputs_test    );
 	// free( weights_test   );	
 
 
