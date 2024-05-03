@@ -34,6 +34,13 @@ int main( int argc, char **argv )
 	initialiseArrays( gradients, inputs, weights, N, M );
 	
 
+	// float *weights_test   = (float*) malloc( N*M*sizeof(float) );
+
+	// for (int i=0; i<N *M ;i++){
+	// 	weights_test[i] = weights[i];
+	// }
+
+
 	cl_mem
 		d_gradients = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, N* sizeof(float), gradients, &status ),
 		d_inputs    = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,   M* sizeof(float), inputs, &status ),
@@ -82,16 +89,16 @@ int main( int argc, char **argv )
 	// 	printf("weights arrays are different\n");
 	
 
-	float *weights_test   = (float*) malloc( N*M*sizeof(float) );
-	for( int i=0; i<N; i++ )
-	{
-		for( int j=0; j<M; j++ )
-			{
-				weights_test[i*M+j] += gradients[i] * inputs[j];
-			}
-	}
+	// THIS PIECE OF .... TEST HAS COSTED ME HOURS!!!!	
+	// for( int i=0; i<N; i++ )
+	// {
+	// 	for( int j=0; j<M; j++ )
+	// 		{
+	// 			weights_test[i*M+j] += gradients[i] * inputs[j];
+	// 		}
+	// }
 	
-	displayWeights(weights_test, N, M);
+	// displayWeights(weights_test, N, M);
 
 
 	// Output result to screen. DO NOT REMOVE THIS LINE (or alter displayWeights() in helper_cwk.h); this will be replaced
