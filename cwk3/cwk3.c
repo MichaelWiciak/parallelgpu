@@ -57,9 +57,9 @@ int main( int argc, char **argv )
 	
 
 	cl_mem
-		d_gradients = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, N  *sizeof(float), NULL, &status ),
-		d_inputs    = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,   M*sizeof(float), NULL, &status ),
-		d_weights   = clCreateBuffer( context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, N*M*sizeof(float), NULL, &status );
+		d_gradients = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, N  *sizeof(float), gradients, &status ),
+		d_inputs    = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,   M*sizeof(float), inputs, &status ),
+		d_weights   = clCreateBuffer( context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, N*M*sizeof(float), weights, &status );
 	if (!d_weights || !d_gradients || !d_inputs) {
         printf("Error: Failed to create buffers!\n");
         exit(1);
