@@ -20,11 +20,9 @@
 // but in parallel
 __kernel void cwk3(__global float* weights, __global float* gradients, __global float* inputs, int M, int N)
 {
-    int i = get_global_id(0);
+    int i = get_global_id(1);
     
-    
-
-    weights[i * M + j] += gradients[i] * inputs[j];
+    weights[i] += gradients[i/M - i] * inputs[i];
     
 }
 
