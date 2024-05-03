@@ -34,32 +34,32 @@ int main( int argc, char **argv )
 	initialiseArrays( gradients, inputs, weights, N, M );
 	
 	// create perfect copies of the arrays
-	// float
-	// 	*gradients_test = (float*) malloc( N  *sizeof(float) ),
-	// 	*inputs_test    = (float*) malloc(   M*sizeof(float) ),
-	// 	*weights_test   = (float*) malloc( N*M*sizeof(float) );
+	float
+		*gradients_test = (float*) malloc( N  *sizeof(float) ),
+		*inputs_test    = (float*) malloc(   M*sizeof(float) ),
+		*weights_test   = (float*) malloc( N*M*sizeof(float) );
 	
 	// copy the data
-	// for( int i=0; i<N  ; i++ ) gradients_test[i] = gradients[i];
-	// for( int i=0; i<  M; i++ ) inputs_test   [i] = inputs   [i];
-	// for( int i=0; i<N*M; i++ ) weights_test  [i] = weights  [i];
+	for( int i=0; i<N  ; i++ ) gradients_test[i] = gradients[i];
+	for( int i=0; i<  M; i++ ) inputs_test   [i] = inputs   [i];
+	for( int i=0; i<N*M; i++ ) weights_test  [i] = weights  [i];
 	
 	// serial check 
-	// for( int i=0; i<N; i++ )
-	// {
-	// 	for( int j=0; j<M; j++ )
-	// 		{
-	// 			weights_test[i*M+j] += gradients_test[i] * inputs_test[j];
-	// 		}
-	// }
+	for( int i=0; i<N; i++ )
+	{
+		for( int j=0; j<M; j++ )
+			{
+				weights_test[i*M+j] += gradients_test[i] * inputs_test[j];
+			}
+	}
 
-	// displayWeights( weights_test, N, M) ;
+	displayWeights( weights_test, N, M) ;
 	
 
 	cl_mem
-		d_gradients = clCreateBuffer( context, CL_MEM_READ_ONLY, N  *sizeof(float), NULL, &status ),
-		d_inputs    = clCreateBuffer( context, CL_MEM_READ_ONLY,   M*sizeof(float), NULL, &status ),
-		d_weights   = clCreateBuffer( context, CL_MEM_READ_WRITE, N*M*sizeof(float), NULL, &status );
+		d_gradients = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, N  *sizeof(float), NULL, &status ),
+		d_inputs    = clCreateBuffer( context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,   M*sizeof(float), NULL, &status ),
+		d_weights   = clCreateBuffer( context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, N*M*sizeof(float), NULL, &status );
 	if (!d_weights || !d_gradients || !d_inputs) {
         printf("Error: Failed to create buffers!\n");
         exit(1);
@@ -83,7 +83,14 @@ int main( int argc, char **argv )
 
 	// execute the kernel
 	size_t global_work_size = N;
-	clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_work_size, NULL, 0, NULL, NULL);
+	clGetDeviceInfo( device, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(size_t), &global_work_size, NULL);
+
+
+	size_t indexSpaceSize[1], workGroupSize[1];
+	indexSpaceSize[0] = N*M;
+	workGroupSize[0] = global_work_size;
+
+	clEnqueueNDRangeKernel(queue, kernel, 1, NULL, indexSpaceSize, workGroupSize, 0, NULL, NULL);
 
 	// copy the data back to the host
 	clEnqueueReadBuffer(queue, d_weights, CL_TRUE, 0, N*M*sizeof(float), weights, 0, NULL, NULL);

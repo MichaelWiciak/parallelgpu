@@ -21,9 +21,11 @@
 __kernel void cwk3(__global float* weights, __global float* gradients, __global float* inputs, int M, int N)
 {
     int i = get_global_id(0);
-    for (int j = 0; j < M; j++) {
-        weights[i * M + j] += gradients[i] * inputs[j];
-    }
+    
+    
+
+    weights[i * M + j] += gradients[i] * inputs[j];
+    
 }
 
 
