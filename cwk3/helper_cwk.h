@@ -1,13 +1,3 @@
-//
-// This is a modified version of helper.h that has additional routines specific to the coursework.
-// As with previous courseworks, this will be replaced with a different version of helper_cwk.h for
-// assessment; therefore:
-// - Do NOT change this file (any such changes will be lost during assessment).
-// - Do NOT copy any of this file into you code.
-// - Do NOT reproduce any of this file in your own code.
-//
-
-
 // Need OpenCL; how to include depends on the OS.
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
